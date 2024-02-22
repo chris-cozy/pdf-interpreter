@@ -20,21 +20,35 @@ def normalize_text(text):
     text = text.lower()
     return text
 
-def extract_lods(text):
-    # Define a regular expression pattern to match LODs - IN PROGRESS
-    lod_pattern = r'[A-Z\s]+:'
+def extract_acronym(text, acronym):
+    # Define a regular expression pattern to match the acronym
+    pattern = r'\b{}\b'.format(acronym)
     # Find all matches in the text
-    lods = re.findall(lod_pattern, text)
-    return lods
+    matches = re.findall(pattern, text)
+    return matches
+
+def extract_nearby_numeric_value(text, term, distance=7):
+    # Find all matches of the term
+    matches = re.finditer(r'\b{}\b'.format(term), text, re.IGNORECASE)
+    numeric_values = []
+
+    # For each match, find the nearest numeric value within the specified distance
+    for match in matches:
+        start, end = match.start(), match.end()
+        subtext = text[max(0, start - distance):min(len(text), end + distance)]
+        numeric_match = re.search(r'\b\d+(\.\d+)?\b', subtext)
+        if numeric_match:
+            numeric_values.append(float(numeric_match.group()))
+
+    return numeric_values
 
 # Path to your PDF file
-pdf_path1 = 'pdf_examples/Cho_and_Park.pdf'
 pdf_path2 = 'pdf_examples/Soni_et_al.pdf'
 pdf_path3 = 'pdf_examples/Vaquer_et_al.pdf'
 
 
 # Extract text from PDF
-extracted_text = extract_text_from_pdf(pdf_path1)
+extracted_text = extract_text_from_pdf(pdf_path2)
 
 # Normalize extracted text
 normalized_text = normalize_text(extracted_text)
@@ -42,9 +56,17 @@ normalized_text = normalize_text(extracted_text)
 print(normalized_text)
 
 # Extract LODs from the normalized text
-# lods = extract_lods(normalized_text)
+lods = extract_acronym(normalized_text, 'lod')
 
 # Print extracted LODs
-# for lod in lods:
-    # print(lod.strip())
+for lod in lods:
+    print(lod.strip())
+    
+    
+# Extract LODs from the normalized text
+numbers = extract_nearby_numeric_value(normalized_text, 'lod')
+
+# Print extracted LODs
+for number in numbers:
+    print(number)
 
