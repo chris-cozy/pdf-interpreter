@@ -41,14 +41,14 @@ def extract_lod_values(text, distance=20):
         numeric_match = re.search(r'\b\d+(\.\d+)?\b', subtext)
         if numeric_match:
             value = float(numeric_match.group())
-            units_match = re.search(r'\b(mg/dl|mm)\b', subtext, re.IGNORECASE)
+            # List of possible units
+            units_match = re.search(r'\b(mg/dl|mm|μm)\b', subtext, re.IGNORECASE)
             units = units_match.group() if units_match else 'NaN'
             lod_data.append({'DOI': doi, 'Value': value, 'Units': units})
         else:
             lod_data.append({'DOI': doi, 'Value': 'NaN', 'Units': 'NaN'})
 
     return pd.DataFrame(lod_data)
-
 
 def analyze_pdf(pdf_path):
     # Extract text from PDF
