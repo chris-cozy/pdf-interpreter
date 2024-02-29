@@ -3,6 +3,7 @@
 
 import PyPDF2
 import re
+import pandas as pd
 
 def extract_text_from_pdf(pdf_path):
     text = ''
@@ -27,7 +28,7 @@ def extract_acronym(text, acronym):
     matches = re.findall(pattern, text)
     return matches
 
-def extract_nearby_numeric_value(text, term, distance=7):
+def extract_nearby_numeric_value(text, term, distance=10):
     # Find all matches of the term
     matches = re.finditer(r'\b{}\b'.format(term), text, re.IGNORECASE)
     numeric_values = []
@@ -42,18 +43,37 @@ def extract_nearby_numeric_value(text, term, distance=7):
 
     return numeric_values
 
+def extract_lod_values(text, distance=20):
+    # Find all instances of "lod" and extract associated numeric value and units
+    matches = re.finditer(r'\b(lod)\b', text, re.IGNORECASE)
+    lod_data = []
+
+    for match in matches:
+        start, end = match.start(), match.end()
+        subtext = text[end:end + distance]  # Adjust window size as needed
+        numeric_match = re.search(r'\b\d+(\.\d+)?\b', subtext)
+        if numeric_match:
+            value = float(numeric_match.group())
+            units_match = re.search(r'\b(mg/dl|mm)\b', subtext, re.IGNORECASE)
+            units = units_match.group() if units_match else 'NaN'
+            lod_data.append({'Value': value, 'Units': units})
+        else:
+            lod_data.append({'Value': 'NaN', 'Units': 'NaN'})
+
+    return pd.DataFrame(lod_data)
+
 # Path to your PDF file
 pdf_path2 = 'pdf_examples/Soni_et_al.pdf'
 pdf_path3 = 'pdf_examples/Vaquer_et_al.pdf'
 
 
 # Extract text from PDF
-extracted_text = extract_text_from_pdf(pdf_path2)
+extracted_text = extract_text_from_pdf(pdf_path3)
 
 # Normalize extracted text
 normalized_text = normalize_text(extracted_text)
 
-print(normalized_text)
+# print(normalized_text)
 
 # Extract LODs from the normalized text
 lods = extract_acronym(normalized_text, 'lod')
@@ -63,10 +83,6 @@ for lod in lods:
     print(lod.strip())
     
     
-# Extract LODs from the normalized text
-numbers = extract_nearby_numeric_value(normalized_text, 'lod')
-
-# Print extracted LODs
-for number in numbers:
-    print(number)
-
+# Extract and display LOD values
+lod_table = extract_lod_values(normalized_text)
+print(lod_table)
