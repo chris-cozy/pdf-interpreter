@@ -76,10 +76,14 @@ def generate_paths(directory_path):
     return pdf_paths
 
 
+
+subdirectory_path = './pdfs'
+output_path = 'output_table.csv'
+
 # Path to your PDF files
-pdf_paths = generate_paths('./pdfs')
+pdf_paths = generate_paths(subdirectory_path)
 
 # Process multiple PDFs and combine data into one table
 combined_table = analyze_multiple_pdfs(pdf_paths)
-print(combined_table)
+combined_table.to_csv(output_path, index=False)
 
