@@ -47,6 +47,14 @@ def extract_lod_values(text, distance=20):
     # Find all instances of "lod" and extract associated numeric value and units
     matches = re.finditer(r'\b(lod)\b', text, re.IGNORECASE)
     lod_data = []
+    
+    # Find DOI
+    doi_match = re.search(r'\b(10\.\d+\/[^\s]+)\b', text)
+
+    if doi_match:
+        doi = doi_match.group()
+    else:
+        doi = 'NaN'
 
     for match in matches:
         start, end = match.start(), match.end()
@@ -56,9 +64,9 @@ def extract_lod_values(text, distance=20):
             value = float(numeric_match.group())
             units_match = re.search(r'\b(mg/dl|mm)\b', subtext, re.IGNORECASE)
             units = units_match.group() if units_match else 'NaN'
-            lod_data.append({'Value': value, 'Units': units})
+            lod_data.append({'DOI': doi, 'Value': value, 'Units': units})
         else:
-            lod_data.append({'Value': 'NaN', 'Units': 'NaN'})
+            lod_data.append({'DOI': doi, 'Value': 'NaN', 'Units': 'NaN'})
 
     return pd.DataFrame(lod_data)
 
