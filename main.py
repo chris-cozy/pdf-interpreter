@@ -4,6 +4,7 @@
 import PyPDF2
 import re
 import pandas as pd
+import os
 
 def extract_text_from_pdf(pdf_path):
     text = ''
@@ -69,9 +70,14 @@ def analyze_multiple_pdfs(pdf_paths):
 
     return combined_table
     
+def generate_paths(directory_path):
+    pdf_files = [f for f in os.listdir(directory_path) if f.endswith('.pdf')]
+    pdf_paths = [os.path.join(directory_path, f) for f in pdf_files]
+    return pdf_paths
+
 
 # Path to your PDF files
-pdf_paths = ['pdf_examples/Soni_et_al.pdf', 'pdf_examples/Vaquer_et_al.pdf']
+pdf_paths = generate_paths('./pdfs')
 
 # Process multiple PDFs and combine data into one table
 combined_table = analyze_multiple_pdfs(pdf_paths)
