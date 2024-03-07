@@ -79,6 +79,7 @@ def generate_paths(directory_path):
 
 subdirectory_path = './pdfs'
 output_path = 'output_table.csv'
+second_output_path = 'cleaned_output_table.csv'
 
 # Path to your PDF files
 pdf_paths = generate_paths(subdirectory_path)
@@ -87,3 +88,11 @@ pdf_paths = generate_paths(subdirectory_path)
 combined_table = analyze_multiple_pdfs(pdf_paths)
 combined_table.to_csv(output_path, index=False)
 
+# Read the original CSV file
+df = pd.read_csv(output_path)
+
+# Drop rows with NaN values
+cleaned_df = df.dropna()
+
+# Save the cleaned data to a new CSV file
+cleaned_df.to_csv(second_output_path, index=False)

@@ -1,5 +1,6 @@
 # Output
 output_table.csv
+cleaned_output_table.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
