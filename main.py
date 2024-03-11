@@ -18,26 +18,25 @@ def extract_text_from_pdf(pdf_path):
 def normalize_text(text):
     # Normalize whitespace
     text = re.sub(r'\s+', ' ', text)
-    # Convert to lowercase
+    
     text = text.lower()
     return text
 
 def extract_lod_values(text, distance=20):
-    # Find all instances of "lod" and extract associated numeric value and units
-    matches = re.finditer(r'\b(lod)\b', text, re.IGNORECASE)
-    lod_data = []
-    
-    # Find DOI
     doi_match = re.search(r'\b(10\.\d+\/[^\s]+)\b', text)
 
     if doi_match:
         doi = doi_match.group()
     else:
         doi = 'NaN'
+        
+    # Find all instances of "lod" and extract associated numeric value and units
+    matches = re.finditer(r'\b(lod)\b', text, re.IGNORECASE)
+    lod_data = []
 
     for match in matches:
         start, end = match.start(), match.end()
-        subtext = text[end:end + distance]  # Adjust window size as needed
+        subtext = text[end:end + distance]
         numeric_match = re.search(r'\b\d+(\.\d+)?\b', subtext)
         if numeric_match:
             value = float(numeric_match.group())
@@ -51,13 +50,10 @@ def extract_lod_values(text, distance=20):
     return pd.DataFrame(lod_data)
 
 def analyze_pdf(pdf_path):
-    # Extract text from PDF
     extracted_text = extract_text_from_pdf(pdf_path)
 
-    # Normalize extracted text
     normalized_text = normalize_text(extracted_text)
         
-    # Extract and display LOD values
     lod_table = extract_lod_values(normalized_text)
     return lod_table
 
@@ -94,5 +90,22 @@ df = pd.read_csv(output_path)
 # Drop rows with NaN values
 cleaned_df = df.dropna()
 
-# Save the cleaned data to a new CSV file
+# Count the duplicates for each DOI
+cleaned_df['Count'] = cleaned_df.groupby(['DOI', 'Value', 'Units'])['DOI'].transform('count')
+
+# Get the maximum count for each DOI
+max_counts = cleaned_df.groupby(['DOI', 'Value', 'Units'])['Count'].max()
+
+# Group the data by DOI and filter each group to keep rows with the maximum count value
+cleaned_df = cleaned_df.groupby('DOI').apply(lambda x: x[x['Count'] == x['Count'].max()])
+
+cleaned_df = cleaned_df.reset_index(drop=True)
+
+# Filter to keep only the first rows within each unique doi
+cleaned_df = cleaned_df.drop_duplicates(['DOI', 'Value'])
+
+# Drop the 'Count' column
+# result = result.drop(columns=['Count'])
+
+# Save the result to a new CSV file
 cleaned_df.to_csv(second_output_path, index=False)
