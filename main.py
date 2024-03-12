@@ -17,11 +17,15 @@ def extract_text_from_pdf(pdf_path):
     - str: Extracted text content from the PDF.
     """
     text = ''
-    with open(pdf_path, 'rb') as file:
-        pdf_reader = PyPDF2.PdfReader(file)
-        for page_num in range(len(pdf_reader.pages)):
-            page = pdf_reader.pages[page_num]
-            text += page.extract_text()
+    try:
+        with open(pdf_path, 'rb') as file:
+            pdf_reader = PyPDF2.PdfReader(file)
+            for page_num in range(len(pdf_reader.pages)):
+                page = pdf_reader.pages[page_num]
+                text += page.extract_text()
+    except Exception as e:
+        print(f"Error extracting text from {pdf_path}: {e}")
+        text = ''  # Set text to empty string if extraction fails
     return text
 
 def normalize_text(text):
@@ -88,6 +92,9 @@ def analyze_pdf(pdf_path):
     - pandas.DataFrame: DataFrame containing extracted LOD values, associated DOI, value, and units.
     """
     extracted_text = extract_text_from_pdf(pdf_path)
+    
+    if not extracted_text:
+        return pd.DataFrame(columns=['DOI', 'Value', 'Units'])
 
     normalized_text = normalize_text(extracted_text)
         
@@ -107,8 +114,11 @@ def analyze_multiple_pdfs(pdf_paths):
     combined_lod_table = pd.DataFrame(columns=['DOI', 'Value', 'Units'])
 
     for pdf_path in pdf_paths:
-        pdf_lod_table = analyze_pdf(pdf_path)
-        combined_lod_table = pd.concat([combined_lod_table, pdf_lod_table], ignore_index=True)
+        try:
+            pdf_lod_table = analyze_pdf(pdf_path)
+            combined_lod_table = pd.concat([combined_lod_table, pdf_lod_table], ignore_index=True)
+        except Exception as e:
+            print(f"Error analyzing {pdf_path}: {e}")
 
     return combined_lod_table
     
