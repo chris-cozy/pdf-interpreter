@@ -14,7 +14,7 @@ The PDF Text Analysis Tool is a Python application that extracts and analyzes te
 1. Clone the repository:
 
 ```
-git clone https://github.com/your-username/pdf-interpreter.git
+git clone https://github.com/chris-cozy/pdf-interpreter.git
 ```
 2. Install the required dependencies:
 
