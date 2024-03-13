@@ -5,7 +5,21 @@ import PyPDF2
 import re
 import pandas as pd
 import os
+from contextlib import contextmanager
+import logging
 
+logging.basicConfig(filename='error.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+@contextmanager
+def open_pdf(pdf_path, mode='rb'):
+    try:
+        with open(pdf_path, mode) as file:
+            yield file
+    except FileNotFoundError:
+        logging.error(f"File not found: {pdf_path}")
+        yield None
+        
 def extract_text_from_pdf(pdf_path):
     """
     Extract text content from a PDF file.
@@ -18,13 +32,14 @@ def extract_text_from_pdf(pdf_path):
     """
     text = ''
     try:
-        with open(pdf_path, 'rb') as file:
-            pdf_reader = PyPDF2.PdfReader(file)
-            for page_num in range(len(pdf_reader.pages)):
-                page = pdf_reader.pages[page_num]
-                text += page.extract_text()
+        with open_pdf(pdf_path) as file:
+            if file:
+                pdf_reader = PyPDF2.PdfReader(file)
+                for page_num in range(len(pdf_reader.pages)):
+                    page = pdf_reader.pages[page_num]
+                    text += page.extract_text()
     except Exception as e:
-        print(f"Error extracting text from {pdf_path}: {e}")
+        logging.error(f"Error extracting text from {pdf_path}: {e}")
         text = ''  # Set text to empty string if extraction fails
     return text
 
@@ -118,7 +133,7 @@ def analyze_multiple_pdfs(pdf_paths):
             pdf_lod_table = analyze_pdf(pdf_path)
             combined_lod_table = pd.concat([combined_lod_table, pdf_lod_table], ignore_index=True)
         except Exception as e:
-            print(f"Error analyzing {pdf_path}: {e}")
+            logging.error(f"Error analyzing {pdf_path}: {e}")
 
     return combined_lod_table
     
