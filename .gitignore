@@ -1,5 +1,6 @@
 # Output
-output_table.csv
+raw_lod_table.csv
+cleaned_lod_table.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
