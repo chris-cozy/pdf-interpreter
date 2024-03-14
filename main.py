@@ -78,7 +78,7 @@ def extract_lod_values(text, distance=20):
         doi = 'NaN'
         
     # Find all instances of "lod" and extract associated numeric value and units
-    matches = re.finditer(r'\b(lod)\b', text, re.IGNORECASE)
+    matches = re.finditer(r'\b(lod|limit of detection)\b', text, re.IGNORECASE)
     lod_data = []
 
     for match in matches:
@@ -233,7 +233,7 @@ def clean_sensitivity_data(raw_sensitivity_csv):
     df = df.dropna()
 
     # Count the duplicates for each DOI
-    df['Count'] = df.groupby(['DOI', 'Value', 'Units'])['DOI'].transform('count')
+    df['Count'] = df.groupby(['DOI', 'Value'])['DOI'].transform('count')
 
     # Filter to keep only the first rows within each unique doi
     df = df.drop_duplicates(['DOI', 'Value'])
