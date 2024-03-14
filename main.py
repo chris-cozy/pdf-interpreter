@@ -96,15 +96,48 @@ def extract_lod_values(text, distance=20):
 
     return pd.DataFrame(lod_data)
 
+def extract_sensitivity_values(text, distance=20):
+    """
+    Extract Sensitivity values from text.
+
+    Args:
+    - text (str): Text to search for sensitivity values.
+    - distance (int): Maximum number of characters to search after the term "sensitivity" for the value and units.
+
+    Returns:
+    - pandas.DataFrame: DataFrame containing extracted Sensitivity values, associated DOI, value, and units.
+    """
+    doi_match = re.search(r'\b(10\.\d+\/[^\s]+)\b', text)
+
+    if doi_match:
+        doi = doi_match.group()
+    else:
+        doi = 'NaN'
+        
+    sensitivity_matches = re.finditer(r'\b(sensitivity)\b', text, re.IGNORECASE)
+    data = []
+    
+    for match in sensitivity_matches:
+        start, end = match.start(), match.end()
+        subtext = text[end:end + distance]
+        numeric_match = re.search(r'\b\d+(\.\d+)?\b', subtext)
+        if numeric_match:
+            value = float(numeric_match.group())
+            data.append({'DOI': doi, 'Value': value})
+        else:
+            data.append({'DOI': doi, 'Value': 'NaN'})
+    
+    return pd.DataFrame(data)
+    
 def analyze_pdf(pdf_path):
     """
-    Analyze a PDF file to extract LOD values.
+    Analyze a PDF file to extract LOD and Sensitivity values.
 
     Args:
     - pdf_path (str): Path to the PDF file.
 
     Returns:
-    - pandas.DataFrame: DataFrame containing extracted LOD values, associated DOI, value, and units.
+    - pandas.DataFrame: DataFrames containing extracted LOD and Sensitivity values, associated DOI, value, and units.
     """
     extracted_text = extract_text_from_pdf(pdf_path)
     
@@ -114,28 +147,31 @@ def analyze_pdf(pdf_path):
     normalized_text = normalize_text(extracted_text)
         
     lod_table = extract_lod_values(normalized_text)
-    return lod_table
+    sensitivity_table = extract_sensitivity_values(normalized_text)
+    return lod_table, sensitivity_table
 
 def analyze_multiple_pdfs(pdf_paths):
     """
-    Analyze multiple PDF files to extract LOD values.
+    Analyze multiple PDF files to extract LOD and Sensitivity values.
 
     Args:
     - pdf_paths (list): List of paths to the PDF files.
 
     Returns:
-    - pandas.DataFrame: DataFrame containing combined extracted LOD values from all PDFs.
+    - pandas.DataFrame: DataFrames containing combined extracted LOD values and Sensitivity values from all PDFs.
     """
     combined_lod_table = pd.DataFrame(columns=['DOI', 'Value', 'Units'])
+    combined_sensitivity_table = pd.DataFrame(columns=['DOI', 'Value'])
 
     for pdf_path in pdf_paths:
         try:
-            pdf_lod_table = analyze_pdf(pdf_path)
+            pdf_lod_table, pdf_sensitivity_table = analyze_pdf(pdf_path)
             combined_lod_table = pd.concat([combined_lod_table, pdf_lod_table], ignore_index=True)
+            combined_sensitivity_table = pd.concat([combined_sensitivity_table, pdf_sensitivity_table], ignore_index=True)
         except Exception as e:
             logging.error(f"Error analyzing {pdf_path}: {e}")
 
-    return combined_lod_table
+    return combined_lod_table, combined_sensitivity_table
     
 def generate_paths(directory_path):
     """
@@ -151,7 +187,7 @@ def generate_paths(directory_path):
     pdf_paths = [os.path.join(directory_path, f) for f in pdf_files]
     return pdf_paths
 
-def clean_data(raw_lod_csv):
+def clean_lod_data(raw_lod_csv):
     """
     Clean the raw LOD data CSV file.
 
@@ -179,18 +215,48 @@ def clean_data(raw_lod_csv):
     df = df.drop_duplicates(['DOI', 'Value'])
     
     return df
+
+def clean_sensitivity_data(raw_sensitivity_csv):
+    """
+    Clean the raw Sensitivity data CSV file.
+
+    Args:
+    - raw_lod_csv (str): Path to the raw Sensitivity data CSV file.
+
+    Returns:
+    - pandas.DataFrame: DataFrame containing cleaned Sensitivity data.
+    """
+    
+    df = pd.read_csv(raw_sensitivity_csv)
+
+    # Drop rows with NaN values
+    df = df.dropna()
+
+    # Count the duplicates for each DOI
+    df['Count'] = df.groupby(['DOI', 'Value', 'Units'])['DOI'].transform('count')
+
+    # Filter to keep only the first rows within each unique doi
+    df = df.drop_duplicates(['DOI', 'Value'])
+    
+    return df
     
 
 
 
 subdirectory_path = './pdfs'
-output_path = 'raw_lod_table.csv'
-second_output_path = 'cleaned_lod_table.csv'
+raw_lod_output_path = 'raw_lod_table.csv'
+clean_lod_output_path = 'cleaned_lod_table.csv'
+raw_sensitivity_output_path = 'raw_sensitivity_table.csv'
+clean_sensitivity_output_path = 'cleaned_sensitivity_table.csv'
 
 pdf_paths = generate_paths(subdirectory_path)
 
-combined_table = analyze_multiple_pdfs(pdf_paths)
-combined_table.to_csv(output_path, index=False)
+combined_lod_table, combined_sensitivity_table = analyze_multiple_pdfs(pdf_paths)
+combined_lod_table.to_csv(raw_lod_output_path, index=False)
+combined_sensitivity_table.to_csv(raw_sensitivity_output_path, index=False)
 
-cleaned_df = clean_data(output_path)
-cleaned_df.to_csv(second_output_path, index=False)
+cleaned_lod = clean_lod_data(raw_lod_output_path)
+cleaned_lod.to_csv(clean_lod_output_path, index=False)
+
+cleaned_sensitivity = clean_sensitivity_data(raw_sensitivity_output_path)
+cleaned_sensitivity.to_csv(clean_sensitivity_output_path, index=False)
