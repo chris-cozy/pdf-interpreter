@@ -1,6 +1,8 @@
 # Output
 raw_lod_table.csv
 cleaned_lod_table.csv
+raw_sensitivity_table.csv
+cleaned_sensitivity_table.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
