@@ -41,6 +41,7 @@ def extract_text_from_pdf(pdf_path):
     except Exception as e:
         logging.error(f"Error extracting text from {pdf_path}: {e}")
         text = ''  # Set text to empty string if extraction fails
+    
     return text
 
 def normalize_text(text):
@@ -53,19 +54,23 @@ def normalize_text(text):
     Returns:
     - str: Normalized text.
     """
+    
     # Normalize whitespace
     text = re.sub(r'\s+', ' ', text)
     
+    # Add space between digits and units
+    text = re.sub(r'(\d)([^\W\d_])', r'\1 \2', text)
+    
     text = text.lower()
+    
     return text
 
-def extract_lod_values(text, distance=20):
+def extract_lod_values(text):
     """
     Extract LOD (Limit of Detection) values from text.
 
     Args:
     - text (str): Text to search for LOD values.
-    - distance (int): Maximum number of characters to search after the term "lod" for the value and units.
 
     Returns:
     - pandas.DataFrame: DataFrame containing extracted LOD values, associated DOI, value, and units.
@@ -83,7 +88,12 @@ def extract_lod_values(text, distance=20):
 
     for match in matches:
         start, end = match.start(), match.end()
-        subtext = text[end:end + distance]
+        subtext = text[end:]
+        # Search until the end of the sentence, marked by a period followed by whitespace
+        sentence_end = re.search(r'\.\s', subtext)
+        if sentence_end:
+            subtext = subtext[:sentence_end.end()]
+        print(subtext)
         numeric_match = re.search(r'\b\d+(\.\d+)?\b', subtext)
         if numeric_match:
             value = float(numeric_match.group())
