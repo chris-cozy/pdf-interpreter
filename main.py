@@ -65,13 +65,12 @@ def normalize_text(text):
     
     return text
 
-def extract_lod_values(text, distance=20):
+def extract_lod_values(text):
     """
     Extract LOD (Limit of Detection) values from text.
 
     Args:
     - text (str): Text to search for LOD values.
-    - distance (int): Maximum number of characters to search after the term "lod" for the value and units.
 
     Returns:
     - pandas.DataFrame: DataFrame containing extracted LOD values, associated DOI, value, and units.
@@ -89,7 +88,11 @@ def extract_lod_values(text, distance=20):
 
     for match in matches:
         start, end = match.start(), match.end()
-        subtext = text[end:end + distance]
+        subtext = text[end:]
+        # Search until the end of the sentence, marked by a period followed by whitespace
+        sentence_end = re.search(r'\.\s', subtext)
+        if sentence_end:
+            subtext = subtext[:sentence_end.end()]
         print(subtext)
         numeric_match = re.search(r'\b\d+(\.\d+)?\b', subtext)
         if numeric_match:
