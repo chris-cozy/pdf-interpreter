@@ -98,7 +98,7 @@ def extract_lod_values(text):
         if numeric_match:
             value = float(numeric_match.group())
             # List of possible units (lower cased)
-            units_match = re.search(r'\b(mg/dl|mm|μm|mg/l)\b', subtext, re.IGNORECASE)
+            units_match = re.search(r'\b(mg/dl|mm|μm|mg/l|mmol/l)\b', subtext, re.IGNORECASE)
             units = units_match.group() if units_match else 'NaN'
             lod_data.append({'DOI': doi, 'Value': value, 'Units': units})
         else:
