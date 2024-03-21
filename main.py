@@ -83,7 +83,7 @@ def extract_lod_values(text):
         doi = 'NaN'
         
     # Find all instances of "lod" and extract associated numeric value and units
-    matches = re.finditer(r'\b(lod|limit of detection)\b', text, re.IGNORECASE)
+    matches = re.finditer(r'\b(lod|limit of detection)\b(?!\s*\(lod\))', text, re.IGNORECASE)
     lod_data = []
 
     for match in matches:
