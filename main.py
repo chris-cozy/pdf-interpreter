@@ -254,10 +254,10 @@ def clean_sensitivity_data(raw_sensitivity_csv):
 
 
 subdirectory_path = './pdfs'
-raw_lod_output_path = 'raw_lod_table.csv'
-clean_lod_output_path = 'cleaned_lod_table.csv'
-raw_sensitivity_output_path = 'raw_sensitivity_table.csv'
-clean_sensitivity_output_path = 'cleaned_sensitivity_table.csv'
+raw_lod_output_path = 'csvs/raw_lod_table.csv'
+clean_lod_output_path = 'csvs/cleaned_lod_table.csv'
+raw_sensitivity_output_path = 'csvs/raw_sensitivity_table.csv'
+clean_sensitivity_output_path = 'csvs/cleaned_sensitivity_table.csv'
 
 pdf_paths = generate_paths(subdirectory_path)
 
