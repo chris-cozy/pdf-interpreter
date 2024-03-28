@@ -83,7 +83,7 @@ def extract_lod_values(text):
         doi = 'NaN'
         
     # Find all instances of "lod" and extract associated numeric value and units
-    matches = re.finditer(r'\b(lod|limit of detection)\b', text, re.IGNORECASE)
+    matches = re.finditer(r'\b(lod|limit of detection)\b(?!\s*\(lod\))', text, re.IGNORECASE)
     lod_data = []
 
     for match in matches:
@@ -98,7 +98,7 @@ def extract_lod_values(text):
         if numeric_match:
             value = float(numeric_match.group())
             # List of possible units (lower cased)
-            units_match = re.search(r'\b(mg/dl|mm|μm|mg/l)\b', subtext, re.IGNORECASE)
+            units_match = re.search(r'\b(mg/dl|mm|μm|mg/l|mmol/l)\b', subtext, re.IGNORECASE)
             units = units_match.group() if units_match else 'NaN'
             lod_data.append({'DOI': doi, 'Value': value, 'Units': units})
         else:
@@ -254,10 +254,10 @@ def clean_sensitivity_data(raw_sensitivity_csv):
 
 
 subdirectory_path = './pdfs'
-raw_lod_output_path = 'raw_lod_table.csv'
-clean_lod_output_path = 'cleaned_lod_table.csv'
-raw_sensitivity_output_path = 'raw_sensitivity_table.csv'
-clean_sensitivity_output_path = 'cleaned_sensitivity_table.csv'
+raw_lod_output_path = 'csvs/raw_lod_table.csv'
+clean_lod_output_path = 'csvs/cleaned_lod_table.csv'
+raw_sensitivity_output_path = 'csvs/raw_sensitivity_table.csv'
+clean_sensitivity_output_path = 'csvs/cleaned_sensitivity_table.csv'
 
 pdf_paths = generate_paths(subdirectory_path)
 
