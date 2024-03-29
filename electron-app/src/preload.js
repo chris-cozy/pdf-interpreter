@@ -1,5 +1,10 @@
 const {contextBridge, ipcRenderer} = require('electron');
 const Toastify = require('toastify-js');
+const path = require('path');
+
+contextBridge.exposeInMainWorld('path', {
+  basename: (filepath) => path.basename(filepath),
+})
 
 contextBridge.exposeInMainWorld('Toastify', {
     toast: (options) => Toastify(options).showToast(),
