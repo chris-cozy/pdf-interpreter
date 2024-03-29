@@ -3,6 +3,43 @@ const pdfList = document.getElementById('pdf-list');
 const analyzeBtn = document.getElementById('analyze-btn');
 const resetBtn = document.getElementById('reset-btn');
 
+// Function to delete a PDF file
+const deletePdf = (filePath) => {
+    ipcRenderer.send('delete-pdf', filePath);
+};
+
+const pdfEntry = (fileName) => {
+    const entryContainer = document.createElement('div');
+    entryContainer.classList.add('flex', 'justify-between', 'items-center', 'mb-2');
+
+    // Create a paragraph element for the file name
+    const fileNameElement = document.createElement('p');
+    fileNameElement.textContent = fileName;
+    fileNameElement.classList.add('p-2', 'bg-gray-800', 'rounded', 'flex-grow', 'mr-2', 'overflow-hidden');
+    entryContainer.appendChild(fileNameElement);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.classList.add('delete-button', 'bg-gray-500', 'text-white', 'px-2', 'py-1', 'rounded-lg', 'hover:bg-gray-600');
+    deleteButton.addEventListener('click', () => {
+        pdfList.removeChild(entryContainer);
+        deletePdf(fileName);
+    });
+    entryContainer.appendChild(deleteButton);
+    return entryContainer
+}
+
+ipcRenderer.send('get-pdf-list');
+
+ipcRenderer.on('pdf-list', (event, pdfFiles) => {
+    if (!pdfFiles) return;
+    pdfFiles.forEach((filePath) => {
+        const fileName = path.basename(filePath);
+        const entry = pdfEntry(fileName);
+        pdfList.appendChild(entry);
+    })
+})
+
 dropArea.addEventListener('dragover', (event) => {
     event.preventDefault();
     dropArea.classList.add('border-blue-500');
@@ -25,13 +62,14 @@ dropArea.addEventListener('drop', (event) => {
     // Display file names
     files.forEach((file) => {
         if (!isPdf(file)) {
-            alertError('Please submit a PDF.');
+            alertError('Only PDF files are accepted');
             return;
         } 
 
-        const fileName = document.createElement('p');
-        fileName.textContent = file.name;
-        pdfList.appendChild(fileName);
+        const entry = pdfEntry(file.name);
+
+        pdfList.appendChild(entry);
+
     });
 });
 
@@ -40,15 +78,15 @@ dropArea.addEventListener('click', () => {
 });
 
 ipcRenderer.on('selected-files', (filePaths) => {
-    console.log(filePaths)
     ipcRenderer.send('save-pdfs', filePaths);
 
     // Display file names
     filePaths.forEach((filePath) => {
-        const fileName = filePath.split('\\').pop();
-        const fileNameElement = document.createElement('p');
-        fileNameElement.textContent = fileName;
-        pdfList.appendChild(fileNameElement);
+        const fileName = path.basename(filePath);
+
+        const entry = pdfEntry(fileName);
+
+        pdfList.appendChild(entry);
     });
 });
 
@@ -60,6 +98,7 @@ analyzeBtn.addEventListener('click', () => {
 
 resetBtn.addEventListener('click', () => {
     pdfList.innerHTML = '';
+    ipcRenderer.send('reset-pdfs');
 });
 
 const isPdf = (file) => {
