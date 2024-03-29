@@ -5,13 +5,14 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "npx electronmon ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^29.1.6"
+    "electron": "^29.1.6",
+    "electronmon": "^2.0.2"
   },
   "dependencies": {
     "toastify-js": "^1.12.0"
