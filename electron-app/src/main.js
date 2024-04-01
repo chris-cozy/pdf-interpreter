@@ -1,5 +1,6 @@
 const {app, BrowserWindow, Menu, ipcMain, shell, dialog} = require('electron');
 const path = require('path');
+const { spawn } = require('child_process');
 const fs = require('fs');
 
 const isMac = process.platform == 'darwin';
@@ -47,6 +48,42 @@ const deleteAllFiles = () => {
     }
 }
 
+const runPythonScript = () => {
+    // Path to the virtual environment's activate script
+    const venvPath = path.join(__dirname, 'python-scripts', 'venv');
+    console.log(venvPath);
+    const venvActivateScript = path.join(venvPath, 'Scripts', 'activate');
+
+    // Path to the Python script within the virtual environment
+    const pythonScriptPath = path.join(venvPath, 'Scripts', 'python.exe');
+    const mainScriptPath = path.join(__dirname, 'python-scripts', 'main.py');
+
+    // Activate the virtual environment
+    const activateProcess = spawn(venvActivateScript, [], { shell: true });
+
+    // Run the Python script
+    activateProcess.on('close', (code) => {
+        console.log(code);
+        if (code === 0) {
+            const pythonProcess = spawn(pythonScriptPath, [mainScriptPath]);
+
+            pythonProcess.stdout.on('data', (data) => {
+                console.log(`stdout: ${data}`);
+            });
+
+            pythonProcess.stderr.on('data', (data) => {
+                console.error(`stderr: ${data}`);
+            });
+
+            pythonProcess.on('close', (code) => {
+                console.log(`child process exited with code ${code}`);
+            });
+        } else {
+            console.error('Failed to activate virtual environment');
+        }
+    });
+};
+
 const menu = [
   ]
 
@@ -66,7 +103,8 @@ ipcMain.on('open-file-dialog', (event) => {
 });
 
 ipcMain.on('analyze-pdfs', (event) => {
-    console.log('Analyze Pdfs');
+    console.log('Analyze 7Pdfs');
+    runPythonScript();
 });
 
 ipcMain.on('save-pdfs', (event, pdfPaths) => {
