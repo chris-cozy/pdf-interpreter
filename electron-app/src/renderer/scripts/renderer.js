@@ -22,8 +22,13 @@ const pdfEntry = (fileName) => {
     entryContainer.appendChild(fileNameElement);
 
     const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Delete';
-    deleteButton.classList.add('delete-button', 'bg-gray-500', 'text-white', 'px-2', 'py-1', 'rounded-lg', 'hover:bg-gray-600');
+    deleteButton.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+  <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+</svg>
+`;
+    deleteButton.classList.add('delete-button', 'text-white', 'px-2', 'py-1', 'rounded-lg', 'hover:bg-gray-600');
     deleteButton.addEventListener('click', () => {
         pdfList.removeChild(entryContainer);
         deletePdf(fileName);
@@ -34,19 +39,24 @@ const pdfEntry = (fileName) => {
 
 const csvEntry = (fileName) => {
     const entryContainer = document.createElement('div');
-    entryContainer.classList.add('bg-gray-800', 'p-4', 'rounded', 'shadow');
+    entryContainer.classList.add('flex', 'justify-between', 'items-center');
 
-    const csvName = document.createElement('h2');
-    csvName.textContent = fileName;
+    const fileNameElement = document.createElement('p');
+    fileNameElement.textContent = fileName;
+    fileNameElement.classList.add('p-2', 'bg-gray-800', 'rounded', 'flex-grow', 'mr-2', 'overflow-hidden');
+    entryContainer.appendChild(fileNameElement);
 
     const downloadBtn = document.createElement('button');
-    downloadBtn.textContent = 'Download';
-    downloadBtn.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-blue-600', 'mr-4');
+    downloadBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-down" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M3.5 10a.5.5 0 0 1-.5-.5v-8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 0 0 1h2A1.5 1.5 0 0 0 14 9.5v-8A1.5 1.5 0 0 0 12.5 0h-9A1.5 1.5 0 0 0 2 1.5v8A1.5 1.5 0 0 0 3.5 11h2a.5.5 0 0 0 0-1z"/>
+    <path fill-rule="evenodd" d="M7.646 15.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 14.293V5.5a.5.5 0 0 0-1 0v8.793l-2.146-2.147a.5.5 0 0 0-.708.708z"/>
+  </svg>`;
+    downloadBtn.classList.add('text-white', 'px-2', 'py-2', 'rounded-lg', 'hover:bg-blue-600');
     downloadBtn.addEventListener('click', () => {
         ipcRenderer.send('download-csv', fileName);
     });
 
-    entryContainer.appendChild(csvName);
+    
     entryContainer.appendChild(downloadBtn);
     return entryContainer;
 };
@@ -169,6 +179,7 @@ ipcRenderer.on('analysis-complete', () => {
 });
 
 backBtn.addEventListener('click', () => {
+    csvList.innerHTML = '';
     resultsScreen.classList.add('hidden');
     homeScreen.classList.remove('hidden');
     ipcRenderer.send('reset');

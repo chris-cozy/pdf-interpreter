@@ -133,8 +133,10 @@ ipcMain.on('analyze-pdfs', (event) => {
 
 ipcMain.on('save-pdfs', (event, pdfPaths) => {
     try {
-        if (!fs.existsSync(pdfDir)) {
+        if (!fs.existsSync(appDir)) {
             fs.mkdirSync(appDir);
+        }
+        if (!fs.existsSync(pdfDir)) {
             fs.mkdirSync(pdfDir);
         }
     
@@ -204,8 +206,9 @@ ipcMain.on('download-csv', async (event, fileName) => {
 });
 
 ipcMain.on('reset', () => {
-    deleteAllPdfFiles();
     deleteAllCsvFiles();
+    deleteAllPdfFiles();
+    
 });
 
 
