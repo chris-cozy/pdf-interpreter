@@ -6,6 +6,10 @@ const fs = require('fs');
 const isMac = process.platform == 'darwin';
 const isDev = process.env.NODE_ENV !== 'production';
 
+const tempDir = app.getPath('temp');
+const appDir = path.join(tempDir, 'pdf-interpreter');
+const pdfDir = path.join(appDir, 'pdfs');
+
 let mainWindow;
 
 const createMainWindow = () => {
@@ -38,8 +42,6 @@ const deleteFile = (filePath) => {
 };
 
 const deleteAllFiles = () => {
-    const tempDir = app.getPath('temp');
-    const pdfDir = path.join(tempDir, 'pdf-interpreter');
     if (fs.existsSync(pdfDir)) {
         fs.readdirSync(pdfDir).forEach((file) => {
             const filePath = path.join(pdfDir, file);
@@ -108,9 +110,8 @@ ipcMain.on('analyze-pdfs', (event) => {
 });
 
 ipcMain.on('save-pdfs', (event, pdfPaths) => {
-    const tempDir = app.getPath('temp');
-    const pdfDir = path.join(tempDir, 'pdf-interpreter');
     if (!fs.existsSync(pdfDir)) {
+        fs.mkdirSync(appDir);
         fs.mkdirSync(pdfDir);
     }
 
@@ -126,8 +127,6 @@ ipcMain.on('reset-pdfs', () => {
 });
 
 ipcMain.on('delete-pdf', (event, fileName) => {
-    const tempDir = app.getPath('temp');
-    const pdfDir = path.join(tempDir, 'pdf-interpreter');
     const pdfPath = path.join(pdfDir, fileName);
 
     deleteFile(pdfPath);
@@ -135,8 +134,6 @@ ipcMain.on('delete-pdf', (event, fileName) => {
 
 // Function to get a list of PDF files in the temp folder
 ipcMain.on('get-pdf-list', (event) => {
-    const tempDir = app.getPath('temp');
-    const pdfDir = path.join(tempDir, 'pdf-interpreter');
     let pdfFiles = [];
 
     if (fs.existsSync(pdfDir)) {
