@@ -6,8 +6,9 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-gray-900 text-white font-sans">
-    <div class="min-h-screen flex items-center justify-center">
-        <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
+    <div id="app" class="min-h-screen flex items-center justify-center">
+        <!-- Home Screen Content-->
+        <div id= "home-screen" class="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
             <div id="drop-area" class="border-2 border-dashed border-gray-600 rounded-lg p-8 mb-4">
                 <p class="text-center text-gray-400">Drag and drop your PDFs here or click to select files</p>
             </div>
@@ -16,6 +17,12 @@
                 <button id="analyze-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Analyze</button>
                 <button id="reset-btn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">Reset</button>
             </div>
+        </div>
+        <!-- Results Screen Content-->
+        <div id="results-screen" class="hidden">
+            <h1 class="text-3xl font-bold mb-8">Results</h1>
+            <div id="csv-list" class="grid grid-cols-2 gap-4"></div>
+            <button id="back-btn" class="mt-8 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back</button>
         </div>
     </div>
     <script src="scripts/renderer.js"></script>

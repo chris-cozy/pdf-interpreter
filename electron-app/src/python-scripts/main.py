@@ -260,6 +260,7 @@ app_directory_path = os.path.join(temp_dir, 'pdf-interpreter')
 pdf_directory_path = os.path.join(app_directory_path, 'pdfs')
 
 csv_directory_path = os.path.join(app_directory_path, 'csvs')
+# csv_directory_path = ('csvs')
 # Create the directory if it doesn't exist
 os.makedirs(csv_directory_path, exist_ok=True)
 
