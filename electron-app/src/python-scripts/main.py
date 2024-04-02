@@ -256,16 +256,17 @@ def clean_sensitivity_data(raw_sensitivity_csv):
 
 
 temp_dir = tempfile.gettempdir()
-pdf_directory_path = os.path.join(temp_dir, 'pdf-interpreter')
+app_directory_path = os.path.join(temp_dir, 'pdf-interpreter')
+pdf_directory_path = os.path.join(app_directory_path, 'pdfs')
 
-output_directory = 'csvs'
+csv_directory_path = os.path.join(app_directory_path, 'csvs')
 # Create the directory if it doesn't exist
-os.makedirs(output_directory, exist_ok=True)
+os.makedirs(csv_directory_path, exist_ok=True)
 
-raw_lod_output_path = os.path.join(output_directory, 'raw_lod_table.csv')
-clean_lod_output_path = os.path.join(output_directory, 'cleaned_lod_table.csv')
-raw_sensitivity_output_path = os.path.join(output_directory, 'raw_sensitivity_table.csv')
-clean_sensitivity_output_path = os.path.join(output_directory, 'cleaned_sensitivity_table.csv')
+raw_lod_output_path = os.path.join(csv_directory_path, 'raw_lod_table.csv')
+clean_lod_output_path = os.path.join(csv_directory_path, 'cleaned_lod_table.csv')
+raw_sensitivity_output_path = os.path.join(csv_directory_path, 'raw_sensitivity_table.csv')
+clean_sensitivity_output_path = os.path.join(csv_directory_path, 'cleaned_sensitivity_table.csv')
 
 pdf_paths = generate_paths(pdf_directory_path)
 
