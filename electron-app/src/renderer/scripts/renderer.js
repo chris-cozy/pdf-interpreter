@@ -16,7 +16,6 @@ const pdfEntry = (fileName) => {
     const entryContainer = document.createElement('div');
     entryContainer.classList.add('flex', 'justify-between', 'items-center', 'mb-2');
 
-    // Create a paragraph element for the file name
     const fileNameElement = document.createElement('p');
     fileNameElement.textContent = fileName;
     fileNameElement.classList.add('p-2', 'bg-gray-800', 'rounded', 'flex-grow', 'mr-2', 'overflow-hidden');
@@ -93,7 +92,6 @@ ipcRenderer.on('download-success', (message) => {
 })
 
 ipcRenderer.on('pdf-list', (pdfFiles) => {
-    console.log(pdfFiles);
     if (!pdfFiles) return;
     pdfFiles.forEach((fileName) => {
         const entry = pdfEntry(fileName);
@@ -102,7 +100,6 @@ ipcRenderer.on('pdf-list', (pdfFiles) => {
 })
 
 ipcRenderer.on('csv-list', (csvFiles) => {
-    console.log('Received CSV list:', csvFiles);
     if (!csvFiles) return;
     csvFiles.forEach((fileName) => {
         const entry = csvEntry(fileName);
@@ -113,12 +110,9 @@ ipcRenderer.on('csv-list', (csvFiles) => {
 ipcRenderer.on('selected-files', (filePaths) => {
     ipcRenderer.send('save-pdfs', filePaths);
 
-    // Display file names
     filePaths.forEach((filePath) => {
         const fileName = path.basename(filePath);
-
         const entry = pdfEntry(fileName);
-
         pdfList.appendChild(entry);
     });
 });
@@ -138,11 +132,9 @@ dropArea.addEventListener('drop', (event) => {
 
     const files = Array.from(event.dataTransfer.files);
 
-    // Send paths to main process
     const pdfPaths = files.filter(isPdf).map((file) => file.path);
     ipcRenderer.send('save-pdfs', pdfPaths);
 
-    // Display file names
     files.forEach((file) => {
         if (!isPdf(file)) {
             alertError('Only PDF files are accepted');
@@ -161,27 +153,25 @@ dropArea.addEventListener('click', () => {
 });
 
 
-
 analyzeBtn.addEventListener('click', (event) => {
     event.preventDefault();
     const fileNames = Array.from(pdfList.children).map((child) => child.textContent);
     ipcRenderer.send('analyze-pdfs', fileNames);
     pdfList.innerHTML = '';
-    
+
     ipcRenderer.send('reset-pdfs');
 });
 
 ipcRenderer.on('analysis-complete', () => {
-    console.log('ANALYSIS DONE')
     ipcRenderer.send('get-csv-list');
     homeScreen.classList.add('hidden');
     resultsScreen.classList.remove('hidden');
 });
 
 backBtn.addEventListener('click', () => {
-    // Hide the results screen and show the home screen
     resultsScreen.classList.add('hidden');
     homeScreen.classList.remove('hidden');
+    ipcRenderer.send('reset');
 });
 
 resetBtn.addEventListener('click', () => {

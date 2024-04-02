@@ -6,7 +6,6 @@ const { error } = require('console');
 
 const isMac = process.platform == 'darwin';
 const isDev = process.env.NODE_ENV !== 'production';
-
 const tempDir = app.getPath('temp');
 const appDir = path.join(tempDir, 'pdf-interpreter');
 const pdfDir = path.join(appDir, 'pdfs');
@@ -34,11 +33,9 @@ const createMainWindow = () => {
     }
 };
 
-// Function to delete a file
 const deleteFile = (filePath) => {
     try {
         fs.unlinkSync(filePath);
-        console.log(`Deleted file: ${filePath}`);
     } catch (err) {
         console.error(`Error deleting file: ${filePath}`, err);
     }
@@ -66,7 +63,6 @@ const runPythonScript = () => {
     return new Promise((resolve, reject) => {
         // Path to the virtual environment's activate script
         const venvPath = path.join(__dirname, 'python-scripts', 'venv');
-        console.log(venvPath);
         const venvActivateScript = path.join(venvPath, 'Scripts', 'activate');
 
         // Path to the Python script within the virtual environment
@@ -116,7 +112,7 @@ ipcMain.on('open-file-dialog', (event) => {
             event.reply('selected-files', result.filePaths);
         }
     }).catch((err) => {
-        console.log(err);
+        console.error(err);
     });
 });
 
@@ -136,16 +132,21 @@ ipcMain.on('analyze-pdfs', (event) => {
 });
 
 ipcMain.on('save-pdfs', (event, pdfPaths) => {
-    if (!fs.existsSync(pdfDir)) {
-        fs.mkdirSync(appDir);
-        fs.mkdirSync(pdfDir);
+    try {
+        if (!fs.existsSync(pdfDir)) {
+            fs.mkdirSync(appDir);
+            fs.mkdirSync(pdfDir);
+        }
+    
+        pdfPaths.forEach((pdfPath) => {
+            const fileName = path.basename(pdfPath);
+            const destPath = path.join(pdfDir, fileName);
+            fs.copyFileSync(pdfPath, destPath);
+        });
+    } catch (error) {
+        console.error(`There was an error copying the pdfs: ${error}`)
     }
-
-    pdfPaths.forEach((pdfPath) => {
-        const fileName = path.basename(pdfPath);
-        const destPath = path.join(pdfDir, fileName);
-        fs.copyFileSync(pdfPath, destPath);
-    });
+    
 });
 
 ipcMain.on('reset-pdfs', () => {
@@ -154,55 +155,57 @@ ipcMain.on('reset-pdfs', () => {
 
 ipcMain.on('delete-pdf', (event, fileName) => {
     const pdfPath = path.join(pdfDir, fileName);
-
     deleteFile(pdfPath);
 });
 
 ipcMain.on('delete-csv', (event, fileName) => {
     const csvPath = path.join(csvDir, fileName);
-
     deleteFile(csvPath);
 });
 
-// Function to get a list of PDF files in the temp folder
+
 ipcMain.on('get-pdf-list', (event) => {
-    let pdfFiles = [];
+    let pdfFileNames = [];
 
     if (fs.existsSync(pdfDir)) {
-        pdfFiles = fs.readdirSync(pdfDir).map((file) => path.basename(file));
+        pdfFileNames = fs.readdirSync(pdfDir).map((file) => path.basename(file));
     }
 
-    event.reply('pdf-list', pdfFiles);
-    console.log('Sent PDF list:', pdfFiles);
+    event.reply('pdf-list', pdfFileNames);
 });
 
 ipcMain.on('get-csv-list', (event) => {
-    let csvFiles = [];
+    let csvFileNames = [];
 
     if (fs.existsSync(csvDir)) {
-        csvFiles = fs.readdirSync(csvDir).map((file) => path.basename(file));
+        csvFileNames = fs.readdirSync(csvDir).map((file) => path.basename(file));
     }
     
-    event.reply('csv-list', csvFiles);
-    console.log('Sent CSV list:', csvFiles);
+    event.reply('csv-list', csvFileNames);
 });
 
 ipcMain.on('download-csv', async (event, fileName) => {
-    const filePath = path.join(csvDir, fileName);
-    const savePath = await dialog.showSaveDialog({
-        defaultPath: fileName,
-        filters: [{name: 'CSV Files', extensions: ['csv']}]
-    });
+    try {
+        const filePath = path.join(csvDir, fileName);
+        const savePath = await dialog.showSaveDialog({
+            defaultPath: fileName,
+            filters: [{name: 'CSV Files', extensions: ['csv']}]
+        });
 
-    if (!savePath.canceled && savePath.filePath) {
-        fs.copyFileSync(filePath, savePath.filePath);
-        const message = `File saved to ${savePath.filePath}`;
-        event.reply('download-success', message);
+        if (!savePath.canceled && savePath.filePath) {
+            fs.copyFileSync(filePath, savePath.filePath);
+            const message = `File saved to ${savePath.filePath}`;
+            event.reply('download-success', message);
+        }
+    } catch (error) {
+        console.error(`Error downloading file: ${error}`);
     }
+    
 });
 
 ipcMain.on('reset', () => {
-    // Implement reset logic here
+    deleteAllPdfFiles();
+    deleteAllCsvFiles();
 });
 
 
@@ -230,6 +233,5 @@ app.on('window-all-closed', () => {
         deleteAllCsvFiles();
         app.quit();
     }
-    
 });
 
