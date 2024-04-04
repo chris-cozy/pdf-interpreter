@@ -254,29 +254,29 @@ def clean_sensitivity_data(raw_sensitivity_csv):
     return df
     
 
+if __name__ == '__main__':
+    temp_dir = tempfile.gettempdir()
+    app_directory_path = os.path.join(temp_dir, 'pdf-interpreter')
+    pdf_directory_path = os.path.join(app_directory_path, 'pdfs')
 
-temp_dir = tempfile.gettempdir()
-app_directory_path = os.path.join(temp_dir, 'pdf-interpreter')
-pdf_directory_path = os.path.join(app_directory_path, 'pdfs')
+    csv_directory_path = os.path.join(app_directory_path, 'csvs')
+    # csv_directory_path = ('csvs')
+    # Create the directory if it doesn't exist
+    os.makedirs(csv_directory_path, exist_ok=True)
 
-csv_directory_path = os.path.join(app_directory_path, 'csvs')
-# csv_directory_path = ('csvs')
-# Create the directory if it doesn't exist
-os.makedirs(csv_directory_path, exist_ok=True)
+    raw_lod_output_path = os.path.join(csv_directory_path, 'raw_lod_table.csv')
+    clean_lod_output_path = os.path.join(csv_directory_path, 'cleaned_lod_table.csv')
+    raw_sensitivity_output_path = os.path.join(csv_directory_path, 'raw_sensitivity_table.csv')
+    clean_sensitivity_output_path = os.path.join(csv_directory_path, 'cleaned_sensitivity_table.csv')
 
-raw_lod_output_path = os.path.join(csv_directory_path, 'raw_lod_table.csv')
-clean_lod_output_path = os.path.join(csv_directory_path, 'cleaned_lod_table.csv')
-raw_sensitivity_output_path = os.path.join(csv_directory_path, 'raw_sensitivity_table.csv')
-clean_sensitivity_output_path = os.path.join(csv_directory_path, 'cleaned_sensitivity_table.csv')
+    pdf_paths = generate_paths(pdf_directory_path)
 
-pdf_paths = generate_paths(pdf_directory_path)
+    combined_lod_table, combined_sensitivity_table = analyze_multiple_pdfs(pdf_paths)
+    combined_lod_table.to_csv(raw_lod_output_path, index=False)
+    combined_sensitivity_table.to_csv(raw_sensitivity_output_path, index=False)
 
-combined_lod_table, combined_sensitivity_table = analyze_multiple_pdfs(pdf_paths)
-combined_lod_table.to_csv(raw_lod_output_path, index=False)
-combined_sensitivity_table.to_csv(raw_sensitivity_output_path, index=False)
+    cleaned_lod = clean_lod_data(raw_lod_output_path)
+    cleaned_lod.to_csv(clean_lod_output_path, index=False)
 
-cleaned_lod = clean_lod_data(raw_lod_output_path)
-cleaned_lod.to_csv(clean_lod_output_path, index=False)
-
-cleaned_sensitivity = clean_sensitivity_data(raw_sensitivity_output_path)
-cleaned_sensitivity.to_csv(clean_sensitivity_output_path, index=False)
+    cleaned_sensitivity = clean_sensitivity_data(raw_sensitivity_output_path)
+    cleaned_sensitivity.to_csv(clean_sensitivity_output_path, index=False)
