@@ -117,10 +117,11 @@ ipcMain.on('open-file-dialog', (event) => {
 });
 
 ipcMain.on('analyze-pdfs', (event) => {
-    console.log('Analyze Pdfs');
+    console.log('Analyzing Pdfs...');
     runPythonScript()
     .then((pythonProcess) => {
         pythonProcess.on('close', (code) => {
+            console.log('Analysis Complete :)');
             event.reply('analysis-complete');
         });
     })
@@ -177,6 +178,7 @@ ipcMain.on('get-pdf-list', (event) => {
 });
 
 ipcMain.on('get-csv-list', (event) => {
+    console.log('Grabbing CSVs...')
     let csvFileNames = [];
 
     if (fs.existsSync(csvDir)) {
@@ -208,7 +210,6 @@ ipcMain.on('download-csv', async (event, fileName) => {
 ipcMain.on('reset', () => {
     deleteAllCsvFiles();
     deleteAllPdfFiles();
-    
 });
 
 

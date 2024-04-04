@@ -7,7 +7,7 @@ const homeScreen = document.getElementById('home-screen');
 const resultsScreen = document.getElementById('results-screen');
 const backBtn = document.getElementById('back-btn');
 
-
+console.log('APP LOADED')
 const deletePdf = (filePath) => {
     ipcRenderer.send('delete-pdf', filePath);
 };
@@ -127,6 +127,12 @@ ipcRenderer.on('selected-files', (filePaths) => {
     });
 });
 
+ipcRenderer.on('analysis-complete', () => {
+    ipcRenderer.send('get-csv-list');
+    homeScreen.classList.add('hidden');
+    resultsScreen.classList.remove('hidden');
+});
+
 dropArea.addEventListener('dragover', (event) => {
     event.preventDefault();
     dropArea.classList.add('border-blue-500');
@@ -167,19 +173,11 @@ analyzeBtn.addEventListener('click', (event) => {
     event.preventDefault();
     const fileNames = Array.from(pdfList.children).map((child) => child.textContent);
     ipcRenderer.send('analyze-pdfs', fileNames);
-    pdfList.innerHTML = '';
-
-    ipcRenderer.send('reset-pdfs');
-});
-
-ipcRenderer.on('analysis-complete', () => {
-    ipcRenderer.send('get-csv-list');
-    homeScreen.classList.add('hidden');
-    resultsScreen.classList.remove('hidden');
 });
 
 backBtn.addEventListener('click', () => {
     csvList.innerHTML = '';
+    pdfList.innerHTML = '';
     resultsScreen.classList.add('hidden');
     homeScreen.classList.remove('hidden');
     ipcRenderer.send('reset');

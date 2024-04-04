@@ -94,7 +94,6 @@ def extract_lod_values(text):
         sentence_end = re.search(r'\.\s', subtext)
         if sentence_end:
             subtext = subtext[:sentence_end.end()]
-        print(subtext)
         numeric_match = re.search(r'\b\d+(\.\d+)?\b', subtext)
         if numeric_match:
             value = float(numeric_match.group())
@@ -194,10 +193,13 @@ def generate_paths(directory_path):
     Returns:
     - list: List of paths to the PDF files in the directory.
     """
+    print("Directory Path:", directory_path)
+    print("Files in Directory:", os.listdir(directory_path))
     pdf_files = [f for f in os.listdir(directory_path) if f.endswith('.pdf')]
     
     pdf_paths = [os.path.join(directory_path, f) for f in pdf_files]
-    print(pdf_paths)
+    print("PDF files:", pdf_files)
+    print("PDF paths:", pdf_paths)
     return pdf_paths
 
 def clean_lod_data(raw_lod_csv):
@@ -220,7 +222,7 @@ def clean_lod_data(raw_lod_csv):
     df['Count'] = df.groupby(['DOI', 'Value', 'Units'])['DOI'].transform('count')
 
     # Group the data by DOI and filter each group to keep rows with the maximum count value
-    df = df.groupby('DOI').apply(lambda x: x[x['Count'] == x['Count'].max()])
+    df = df.groupby('DOI').apply(lambda x: x[x['Count'] == x['Count'].max()], include_groups=False)
 
     df = df.reset_index(drop=True)
 
@@ -260,7 +262,6 @@ if __name__ == '__main__':
     pdf_directory_path = os.path.join(app_directory_path, 'pdfs')
 
     csv_directory_path = os.path.join(app_directory_path, 'csvs')
-    # csv_directory_path = ('csvs')
     # Create the directory if it doesn't exist
     os.makedirs(csv_directory_path, exist_ok=True)
 
