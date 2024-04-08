@@ -4,6 +4,9 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const { error } = require('console');
 
+// Test Production Mode
+process.env.NODE_ENV = 'production';
+
 const isMac = process.platform == 'darwin';
 const isDev = process.env.NODE_ENV !== 'production';
 const tempDir = app.getPath('temp');
