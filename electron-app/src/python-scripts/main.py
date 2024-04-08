@@ -214,6 +214,7 @@ def clean_lod_data(raw_lod_csv):
     """
     
     df = pd.read_csv(raw_lod_csv)
+    print(df.columns)
 
     # Drop rows with NaN values
     df = df.dropna()
@@ -222,7 +223,7 @@ def clean_lod_data(raw_lod_csv):
     df['Count'] = df.groupby(['DOI', 'Value', 'Units'])['DOI'].transform('count')
 
     # Group the data by DOI and filter each group to keep rows with the maximum count value
-    df = df.groupby('DOI').apply(lambda x: x[x['Count'] == x['Count'].max()], include_groups=False)
+    df = df.groupby('DOI').apply(lambda x: x[x['Count'] == x['Count'].max()])
 
     df = df.reset_index(drop=True)
 
@@ -243,6 +244,7 @@ def clean_sensitivity_data(raw_sensitivity_csv):
     """
     
     df = pd.read_csv(raw_sensitivity_csv)
+    print(df.columns)
 
     # Drop rows with NaN values
     df = df.dropna()
