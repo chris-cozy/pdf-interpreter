@@ -74,9 +74,10 @@ const alertError = (message) => {
         style: {
             background: "#ff5252",
             color: "#ffffff",
-            borderRadius: "8px",
-            padding: "16px",
-            boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
+            borderRadius: "10px",
+            padding: "8px",
+            boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+            margin: "4px"
         }
     });
 };
@@ -89,9 +90,10 @@ const alertSuccess = (message) => {
         style: {
             background: "#4caf50",
             color: "#ffffff",
-            borderRadius: "8px",
-            padding: "16px",
-            boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
+            borderRadius: "10px",
+            padding: "8px",
+            boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+            margin: "4px"
         }
     });
 };
@@ -174,6 +176,10 @@ dropArea.addEventListener('click', () => {
 analyzeBtn.addEventListener('click', (event) => {
     event.preventDefault();
     const fileNames = Array.from(pdfList.children).map((child) => child.textContent);
+    if (fileNames.length == 0) {
+        alertError('You must add at least one file');
+        return;
+    }
     ipcRenderer.send('analyze-pdfs', fileNames);
 
     homeScreen.classList.add('hidden');
